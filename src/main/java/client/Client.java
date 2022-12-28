@@ -17,8 +17,7 @@ public class Client {
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
 
-            out.println("{ \"title\": \"булка\", \"date\": \"2022.02.08\", \"sum\": 200 }");
-
+            out.println("{ \"title\": \"булка\", \"date\": \"2022.01.08\", \"sum\": 200 }");
             System.out.println(in.readLine());
         } catch (IOException e) {
             e.printStackTrace();

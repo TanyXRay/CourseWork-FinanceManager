@@ -1,25 +1,32 @@
 package server;
 
-import com.google.gson.Gson;
-import finance.FinanceManager;
-import tcvreader.TcvReader;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import manager.FinanceManager;
+import purchase.Purchase;
+import purchase.service.PurchaseService;
+import report.category.ReportMaxCategory;
+import report.service.ReportService;
+import request.product.ProductRequest;
+import tcvreader.DetermineCategoryFromTsv;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 /**
- * Класс-сервер, который принимает запрос от клиента
+ * Класс - сервер, который принимает запрос от клиента
  */
 public class Server {
     private final int port;
-    private final FinanceManager financeManager;
-    private TcvReader tcvReader = new TcvReader();
+    private final Purchase purchase = new Purchase();
+    private final DetermineCategoryFromTsv categoryFromTsv = new DetermineCategoryFromTsv();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final PurchaseService purchaseService = new PurchaseService(purchase, categoryFromTsv);
+    private final FinanceManager financeManager = new FinanceManager(purchase);
+    private final ReportService reportService = new ReportService(financeManager, purchaseService);
 
-    public Server(int port, FinanceManager financeManager) {
+    public Server(int port) {
         this.port = port;
-        this.financeManager = financeManager;
     }
 
     /**
@@ -33,12 +40,11 @@ public class Server {
                      PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
-                    Gson gson = new Gson();
-                    Map<String, String> mapFromJson = gson.fromJson(in.readLine(), Map.class);
-                    tcvReader.checkCategoriesInFile(mapFromJson);
-
-                    // String allTasks = financeManager.getAllTasks();
-                    //  out.println(allTasks);
+                    String jsonString = in.readLine(); // читаем строку от клиента (покупка)
+                    ProductRequest productRequest = mapper.readValue(jsonString, ProductRequest.class); // парсим строку в класс Purchase
+                    ReportMaxCategory summaryReportData = reportService.buyItem(productRequest);//получаем макс.категорию
+                    String report = mapper.writeValueAsString(summaryReportData);//сериализуем объект в JSON строку
+                    out.println(report);//отправляем ответ в виде строки клиенту
                 }
             }
         } catch (IOException e) {

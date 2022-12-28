@@ -1,20 +1,30 @@
-package product;
+package request.product;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Date;
 
-@JsonIgnoreProperties(value = { "category" })
-public class ProductData {
+/**
+ * Класс - продукт по запросу от клиента
+ */
+@JsonIgnoreProperties(value = {"category"})
+public class ProductRequest {
     public String title;
     public String category;
-    public Date date;
-    public Double cost;
 
-    public ProductData(String title, String category, Date date, Double cost) {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+    public Date date;
+    public double sum;
+
+    public ProductRequest(String title, String category, Date date, double sum) {
         this.title = title;
         this.category = category;
         this.date = date;
-        this.cost = cost;
+        this.sum = sum;
+    }
+
+    public ProductRequest() {
     }
 
     public String getTitle() {
@@ -41,11 +51,11 @@ public class ProductData {
         this.date = date;
     }
 
-    public Double getCost() {
-        return cost;
+    public double getSum() {
+        return sum;
     }
 
-    public void setCost(Double cost) {
-        this.cost = cost;
+    public void setSum(double sum) {
+        this.sum = sum;
     }
 }
